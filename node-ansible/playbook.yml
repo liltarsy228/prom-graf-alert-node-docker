@@ -1,0 +1,46 @@
+- name: Installation node-exporter
+  hosts: node-exporter-hosts
+  become: true
+  gather_facts: no
+  tasks:
+
+    - name: Gather facts about distribution (OS)
+      ansible.builtin.setup:
+        filter:
+          - 'ansible_distribution'
+          - 'ansible_userspace_architecture'
+
+    - name: print OS
+      ansible.builtin.debug:
+        var: ansible_facts
+
+    - name: Check user nodeusr 
+      ansible.builtin.user:
+        name: nodeusr
+        shell: /bin/false
+        create_home: no
+        state: present
+
+    - name: Install node-exporter
+      ansible.builtin.dnf:
+        name: prometheus-node_exporter
+        state: present
+      when: ansible_facts['distribution'] == "RED"
+    
+    - name: CP node-exporter daemon file to host
+      ansible.builtin.copy:
+        src: node_exporter.service
+        dest: /etc/systemd/system/
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload DAEMONS
+      ansible.builtin.systemd_service:
+        daemon_reload: yes
+
+    - name: Start node-exporter
+      ansible.builtin.systemd_service:
+        name: node_exporter.service
+        state: started
+        enabled: true

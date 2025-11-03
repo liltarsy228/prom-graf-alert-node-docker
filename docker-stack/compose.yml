@@ -1,0 +1,42 @@
+name: Docker stack Prometheus+AlertManager+Grafana
+
+services:
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    restart: always
+    container_name: alertnamager
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./alertmanager:/alertmanager/data
+      - ./alertmanager/config/:/etc/alertmanager/
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    ports:
+      - 9093:9093
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    container_name: prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./prometheus/:/prometheus/data
+      - ./prometheus/config/:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus/data'
+
+  grafana:
+    image: grafana/grafana-enterprise
+    restart: always
+    container_name: grafana
+    volumes:
+      - ./grafana:/var/lib/grafana
+    ports:
+      - 3000:3000
+
+
+

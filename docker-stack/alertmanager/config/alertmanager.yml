@@ -1,0 +1,20 @@
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'tele-me'
+
+receivers:
+  - name: tele-me
+    telegram_configs:
+      - bot_token: 8323289272:AAE3fOWJhX9-2hhTP3fqZawcjjo2nlW-iyg
+        api_url: 'https://api.telegram.org'
+        chat_id: -1003137742652
+        parse_mode: 'Markdown'
+        message: |
+          🚨 *Alertmanager* 🚨
+          ---------------------
+          🔺 Alertname: {{ .GroupLabels.alertname }}
+          🔺 Severity: {{ range .Alerts }}{{ .Labels.severity }}{{ end }}
+          📌 Summary: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}

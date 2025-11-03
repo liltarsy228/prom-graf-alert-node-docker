@@ -1,0 +1,39 @@
+groups:
+ - name: example
+   rules:
+     - alert: InstanceDown
+       expr: up == 0
+       for: 1m
+       labels:
+         severity: critical
+         host: '{{ $labels.instance }}'
+       annotations:
+         summary: "Node exporter is DOWN on host: {{ $labels.instance }}"
+
+     - alert: CPUSecondsTotal
+       expr: node_cpu_seconds_total{mode="user", cpu="0"} > 3000
+       for: 1m
+       labels:
+         severity: warning
+         host: '{{ $labels.instance }}'
+       annotations:
+         summary: "CPU is OVER OVER on host: {{ $labels.instance }}"
+
+     - alert: Memmory usage more 80
+       expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) <= 0.5
+       for: 5s
+       labels:
+         severity: warning
+         host: '{{ $labels.instance }}'
+       annotations:
+         summary: "Осталось меньше 50% свободной оперативной памяти on host: {{ $labels.instance }}"
+       
+     - alert: Disk partition state fully
+       expr: (node_filesystem_free_bytes{device="/dev/nvme0n1p4"}/node_filesystem_size_bytes{device="/dev/nvme0n1p4"}) <= 0.2
+       for: 5s
+       labels:
+         severity: critical
+         host: '{{ $labels.instance }}'
+       annotations:
+         summary: "Part nvme0n1p4 of nvme0n1 more usage. Free space < 20% on host: {{ $labels.instance }}"  
+
